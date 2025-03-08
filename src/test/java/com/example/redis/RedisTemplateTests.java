@@ -1,17 +1,23 @@
 package com.example.redis;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
+import java.io.InvalidClassException;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.SerializationException;
 
 @SpringBootTest
 public class RedisTemplateTests {
@@ -107,6 +113,14 @@ public class RedisTemplateTests {
 			.description("Expensive 😢")
 			.build());
 		System.out.println(ops.get("my:mouse"));
+	}
+	//위 테스트 수행 후 serialVersionUID 변경
+	@Test
+	public void serialVersionUID_값이_바뀌면_InvalidClassException_을_던진다(){
+		ValueOperations<String, ItemDto> ops = redisTemplate.opsForValue();
+
+		assertThatThrownBy(()-> ops.get("my:keyboard")
+		).hasRootCauseInstanceOf(InvalidClassException.class);
 	}
 
 }
